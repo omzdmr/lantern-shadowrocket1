@@ -1,0 +1,9 @@
+#!name=Lantern Free Probe v4
+#!desc=Shadowrocket içinde doğrudan Lantern Free config API probe. Sonucu HTML sayfasında gösterir; bildirim ve localhost gerekmez.
+
+[Script]
+Lantern Free Probe v4 = type=http-request,pattern=^http:\/\/223\.5\.5\.5\/lantern-run(?:\?.*)?$,requires-body=false,timeout=30,engine=jsc,script-path=https://raw.githubusercontent.com/omzdmr/lantern-shadowrocket1/main/lantern_shadowrocket_probe_v4.js,enable=true
+
+[Rule]
+IP-CIDR,223.5.5.5/32,DIRECT,no-resolve
+DOMAIN,df.iantem.io,DIRECT
