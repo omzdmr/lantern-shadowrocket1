@@ -1,0 +1,618 @@
+/*
+ Lantern Free -> Shadowrocket direct probe v9
+ Purpose:
+   - Intercept http://lantern-probe.test/sub or /debug
+   - Fetch Lantern's public Free SDK config directly from the iPhone
+   - Decode protobuf ConfigResponse without external libraries
+   - Return a synthetic local response to Shadowrocket
+
+ IMPORTANT:
+   v1 is a diagnostic/probe. It does NOT yet claim that a Lantern transport can
+   be used as a stock Shadowrocket VMess/Shadowsocks node. Lantern wraps some
+   transports with its own HTTP CONNECT/auth behavior.
+*/
+
+(function () {
+  "use strict";
+
+  var FEED_HOST = "connect.rom.miui.com";
+  var CONFIG_URL = "https://df.iantem.io/api/v1/config";
+
+  // Values used by the public getlantern/lanternsdk-android Free SDK.
+  // We mirror that public SDK bootstrap identity, not a user's private account.
+  var LANTERN = {
+    flashlightVersion: "7.6.179",
+    clientVersion: "9999.99.99",
+    userId: "381696446",
+    proToken: "K1qttSsZruN",
+    deviceId: "a34113",
+    platform: "android",
+    locale: "",
+    timezone: "Asia/Shanghai"
+  };
+
+  function log(s) {
+    try { console.log("[LanternFeed] " + s); } catch (_) {}
+  }
+
+  function notify(title, subtitle, body) {
+    try {
+      if (typeof $notification !== "undefined" && $notification.post) {
+        $notification.post(title, subtitle || "", body || "");
+      }
+    } catch (_) {}
+  }
+
+  function utf8Encode(str) {
+    if (typeof TextEncoder !== "undefined") {
+      return Array.prototype.slice.call(new TextEncoder().encode(str));
+    }
+    var out = [];
+    for (var i = 0; i < str.length; i++) {
+      var c = str.charCodeAt(i);
+      if (c < 0x80) {
+        out.push(c);
+      } else if (c < 0x800) {
+        out.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
+      } else if (c >= 0xd800 && c <= 0xdbff && i + 1 < str.length) {
+        var c2 = str.charCodeAt(++i);
+        var cp = 0x10000 + (((c & 0x3ff) << 10) | (c2 & 0x3ff));
+        out.push(
+          0xf0 | (cp >> 18),
+          0x80 | ((cp >> 12) & 0x3f),
+          0x80 | ((cp >> 6) & 0x3f),
+          0x80 | (cp & 0x3f)
+        );
+      } else {
+        out.push(
+          0xe0 | (c >> 12),
+          0x80 | ((c >> 6) & 0x3f),
+          0x80 | (c & 0x3f)
+        );
+      }
+    }
+    return out;
+  }
+
+  function utf8Decode(arr) {
+    if (typeof TextDecoder !== "undefined") {
+      try { return new TextDecoder("utf-8").decode(new Uint8Array(arr)); } catch (_) {}
+    }
+    var s = "";
+    for (var i = 0; i < arr.length;) {
+      var c = arr[i++];
+      if (c < 0x80) {
+        s += String.fromCharCode(c);
+      } else if ((c & 0xe0) === 0xc0) {
+        var c2 = arr[i++];
+        s += String.fromCharCode(((c & 0x1f) << 6) | (c2 & 0x3f));
+      } else if ((c & 0xf0) === 0xe0) {
+        var c2e = arr[i++], c3e = arr[i++];
+        s += String.fromCharCode(((c & 0x0f) << 12) | ((c2e & 0x3f) << 6) | (c3e & 0x3f));
+      } else {
+        var c2f = arr[i++], c3f = arr[i++], c4f = arr[i++];
+        var cp = ((c & 0x07) << 18) | ((c2f & 0x3f) << 12) | ((c3f & 0x3f) << 6) | (c4f & 0x3f);
+        cp -= 0x10000;
+        s += String.fromCharCode(0xd800 | (cp >> 10), 0xdc00 | (cp & 0x3ff));
+      }
+    }
+    return s;
+  }
+
+  function concat() {
+    var out = [];
+    for (var i = 0; i < arguments.length; i++) {
+      var a = arguments[i];
+      for (var j = 0; j < a.length; j++) out.push(a[j] & 255);
+    }
+    return out;
+  }
+
+  function encVarint(n) {
+    var out = [];
+    n = Number(n);
+    while (n > 127) {
+      out.push((n & 0x7f) | 0x80);
+      n = Math.floor(n / 128);
+    }
+    out.push(n & 0x7f);
+    return out;
+  }
+
+  function key(fieldNo, wireType) {
+    return encVarint(fieldNo * 8 + wireType);
+  }
+
+  function fieldBytes(fieldNo, bytes) {
+    return concat(key(fieldNo, 2), encVarint(bytes.length), bytes);
+  }
+
+  function fieldString(fieldNo, value) {
+    if (value === undefined || value === null || value === "") return [];
+    return fieldBytes(fieldNo, utf8Encode(String(value)));
+  }
+
+  function fieldMessage(fieldNo, bytes) {
+    return fieldBytes(fieldNo, bytes);
+  }
+
+  // ConfigRequest:
+  //   client_info = 1
+  //   proxy       = 2
+  //
+  // Flashlight always includes Proxy.last_request, even on the first fetch.
+  // The first-fetch value is Go's zero time (0001-01-01T00:00:00Z).
+  // google.protobuf.Timestamp encodes that as seconds = -62135596800, nanos = 0.
+  //
+  // Negative int64 protobuf varints are 10-byte two's-complement values.
+  // Precomputed encoding for -62135596800:
+  //   80 92 b8 c3 98 fe ff ff ff 01
+  var ZERO_GO_TIME_SECONDS_VARINT = [
+    0x80, 0x92, 0xb8, 0xc3, 0x98, 0xfe, 0xff, 0xff, 0xff, 0x01
+  ];
+
+  function buildConfigRequest() {
+    var clientInfo = concat(
+      fieldString(1, LANTERN.flashlightVersion),
+      fieldString(2, LANTERN.clientVersion),
+      fieldString(3, LANTERN.userId),
+      fieldString(4, LANTERN.proToken)
+    );
+
+    // google.protobuf.Timestamp { seconds: -62135596800 }
+    var timestamp = concat(
+      key(1, 0),
+      ZERO_GO_TIME_SECONDS_VARINT
+    );
+
+    // ConfigRequest.Proxy { names: [], last_request: timestamp }
+    var proxy = concat(
+      fieldMessage(2, timestamp)
+    );
+
+    return concat(
+      fieldMessage(1, clientInfo),
+      fieldMessage(2, proxy)
+    );
+  }
+
+  function toArrayBuffer(bytes) {
+    var u8 = new Uint8Array(bytes);
+    return u8.buffer;
+  }
+
+  function normalizeBinary(data, response) {
+    // Different Shadowrocket builds / compatibility layers may expose the
+    // binary result in data, response.bodyBytes or response.body.
+    if (data instanceof ArrayBuffer) return new Uint8Array(data);
+    if (typeof Uint8Array !== "undefined" && data instanceof Uint8Array) return data;
+    if (response && response.bodyBytes instanceof ArrayBuffer) return new Uint8Array(response.bodyBytes);
+    if (response && response.bodyBytes instanceof Uint8Array) return response.bodyBytes;
+    if (response && response.body instanceof ArrayBuffer) return new Uint8Array(response.body);
+    if (response && response.body instanceof Uint8Array) return response.body;
+
+    // Binary-mode may surface a byte-string on some engines.
+    if (typeof data === "string") {
+      var a = new Uint8Array(data.length);
+      for (var i = 0; i < data.length; i++) a[i] = data.charCodeAt(i) & 255;
+      return a;
+    }
+    throw new Error("Binary protobuf response not available");
+  }
+
+  function Reader(input) {
+    this.b = input instanceof Uint8Array ? input : new Uint8Array(input);
+    this.p = 0;
+  }
+  Reader.prototype.eof = function () { return this.p >= this.b.length; };
+  Reader.prototype.varint = function () {
+    var n = 0, mul = 1, count = 0;
+    while (this.p < this.b.length) {
+      var x = this.b[this.p++];
+      n += (x & 0x7f) * mul;
+      if ((x & 0x80) === 0) return n;
+      mul *= 128;
+      if (++count > 9) throw new Error("varint too long");
+    }
+    throw new Error("truncated varint");
+  };
+  Reader.prototype.bytes = function () {
+    var len = this.varint();
+    if (len < 0 || this.p + len > this.b.length) throw new Error("bad length");
+    var x = this.b.slice(this.p, this.p + len);
+    this.p += len;
+    return x;
+  };
+  Reader.prototype.skip = function (wire) {
+    if (wire === 0) { this.varint(); return; }
+    if (wire === 1) { this.p += 8; return; }
+    if (wire === 2) { var n = this.varint(); this.p += n; return; }
+    if (wire === 5) { this.p += 4; return; }
+    throw new Error("unsupported protobuf wire type " + wire);
+  };
+
+  function readFields(bytes, fn) {
+    var r = new Reader(bytes);
+    while (!r.eof()) {
+      var k = r.varint();
+      var no = Math.floor(k / 8);
+      var wire = k & 7;
+      if (!fn(r, no, wire)) r.skip(wire);
+      if (r.p > r.b.length) throw new Error("protobuf overrun");
+    }
+  }
+
+  function readStringField(r, wire) {
+    if (wire !== 2) throw new Error("expected string");
+    return utf8Decode(r.bytes());
+  }
+
+  function parseLocation(bytes) {
+    var o = {};
+    readFields(bytes, function (r, no, wire) {
+      if (no === 1) { o.city = readStringField(r, wire); return true; }
+      if (no === 2) { o.country = readStringField(r, wire); return true; }
+      if (no === 3) { o.countryCode = readStringField(r, wire); return true; }
+      return false;
+    });
+    return o;
+  }
+
+  function parseTLS(bytes) {
+    var o = { type: "tls" };
+    readFields(bytes, function (r, no, wire) {
+      if (no === 2) { o.tlsFrag = readStringField(r, wire); return true; }
+      if (no === 3) { o.sni = readStringField(r, wire); return true; }
+      return false;
+    });
+    return o;
+  }
+
+  function parseTLSMasq(bytes) {
+    var o = { type: "tlsmasq", cipherSuites: [] };
+    readFields(bytes, function (r, no, wire) {
+      if (no === 1) { o.originAddr = readStringField(r, wire); return true; }
+      if (no === 2) { o.secretBytes = Array.prototype.slice.call(r.bytes()); return true; }
+      if (no === 3) { o.tlsMinVersion = readStringField(r, wire); return true; }
+      if (no === 4) { o.cipherSuites.push(readStringField(r, wire)); return true; }
+      if (no === 5) { o.tlsFrag = readStringField(r, wire); return true; }
+      return false;
+    });
+    return o;
+  }
+
+  function parseSS(bytes) {
+    var o = { type: "shadowsocks" };
+    readFields(bytes, function (r, no, wire) {
+      if (no === 1) { o.secret = readStringField(r, wire); return true; }
+      if (no === 2) { o.cipher = readStringField(r, wire); return true; }
+      if (no === 3) { o.prefixGenerator = readStringField(r, wire); return true; }
+      if (no === 4 && wire === 0) { o.withTLS = !!r.varint(); return true; }
+      return false;
+    });
+    return o;
+  }
+
+  function parseStarbridge(bytes) {
+    var o = { type: "starbridge" };
+    readFields(bytes, function (r, no, wire) {
+      if (no === 1) { o.publicKey = readStringField(r, wire); return true; }
+      return false;
+    });
+    return o;
+  }
+
+  function parseAlgeneva(bytes) {
+    var o = { type: "algeneva" };
+    readFields(bytes, function (r, no, wire) {
+      if (no === 1) { o.strategy = readStringField(r, wire); return true; }
+      return false;
+    });
+    return o;
+  }
+
+  function parseVMess(bytes) {
+    var o = { type: "vmess" };
+    readFields(bytes, function (r, no, wire) {
+      if (no === 1) { o.uuid = readStringField(r, wire); return true; }
+      if (no === 2) { o.security = readStringField(r, wire); return true; }
+      return false;
+    });
+    return o;
+  }
+
+  function parseProxy(bytes) {
+    var p = { location: null, transport: null };
+    readFields(bytes, function (r, no, wire) {
+      if (no === 1) { p.addr = readStringField(r, wire); return true; }
+      if (no === 2) { p.track = readStringField(r, wire); return true; }
+      if (no === 3 && wire === 2) { p.location = parseLocation(r.bytes()); return true; }
+      if (no === 4) { p.name = readStringField(r, wire); return true; }
+      if (no === 5 && wire === 0) { p.port = r.varint(); return true; }
+      if (no === 6) { p.protocol = readStringField(r, wire); return true; }
+      if (no === 10 && wire === 2) { p.certPemBytes = Array.prototype.slice.call(r.bytes()); return true; }
+      if (no === 11) { p.authToken = readStringField(r, wire); return true; }
+      if (no === 12 && wire === 0) { p.trusted = !!r.varint(); return true; }
+
+      if (no === 20 && wire === 2) { p.transport = parseTLS(r.bytes()); return true; }
+      if (no === 21 && wire === 2) { p.transport = parseTLSMasq(r.bytes()); return true; }
+      if (no === 22 && wire === 2) { p.transport = parseSS(r.bytes()); return true; }
+      if (no === 23 && wire === 2) { r.bytes(); p.transport = {type:"broflake"}; return true; }
+      if (no === 24 && wire === 2) { p.transport = parseStarbridge(r.bytes()); return true; }
+      if (no === 25 && wire === 2) { p.transport = parseAlgeneva(r.bytes()); return true; }
+      if (no === 26 && wire === 2) { r.bytes(); p.transport = {type:"water"}; return true; }
+      if (no === 27 && wire === 2) { p.transport = parseVMess(r.bytes()); return true; }
+
+      return false;
+    });
+    return p;
+  }
+
+  function parseProxyContainer(bytes) {
+    var out = [];
+    readFields(bytes, function (r, no, wire) {
+      if (no === 1 && wire === 2) {
+        out.push(parseProxy(r.bytes()));
+        return true;
+      }
+      return false;
+    });
+    return out;
+  }
+
+  function parseConfigResponse(bytes) {
+    var out = { proxies: [] };
+    readFields(bytes, function (r, no, wire) {
+      if (no === 1) { out.proToken = readStringField(r, wire); return true; }
+      if (no === 2) { out.country = readStringField(r, wire); return true; }
+      if (no === 3) { out.ip = readStringField(r, wire); return true; }
+      if (no === 4 && wire === 2) { out.proxies = parseProxyContainer(r.bytes()); return true; }
+      return false;
+    });
+    return out;
+  }
+
+  function redactProxy(p) {
+    return {
+      name: p.name || "",
+      addr: p.addr || "",
+      port: p.port || 0,
+      protocol: p.protocol || "",
+      country: p.location && p.location.countryCode ? p.location.countryCode : "",
+      city: p.location && p.location.city ? p.location.city : "",
+      trusted: !!p.trusted,
+      transport: p.transport ? {
+        type: p.transport.type || "",
+        cipher: p.transport.cipher || "",
+        withTLS: !!p.transport.withTLS,
+        prefixGenerator: p.transport.prefixGenerator ? "<present>" : "",
+        sni: p.transport.sni || "",
+        security: p.transport.security || "",
+        tlsMinVersion: p.transport.tlsMinVersion || "",
+        originAddr: p.transport.originAddr || "",
+        publicKey: p.transport.publicKey ? "<present>" : "",
+        strategy: p.transport.strategy ? "<present>" : ""
+      } : null,
+      hasAuthToken: !!p.authToken,
+      hasCert: !!(p.certPemBytes && p.certPemBytes.length)
+    };
+  }
+
+  function transportSummary(proxies) {
+    var counts = {};
+    proxies.forEach(function (p) {
+      var t = (p.transport && p.transport.type) || p.protocol || "unknown";
+      counts[t] = (counts[t] || 0) + 1;
+    });
+    return counts;
+  }
+
+  function summaryText(cfg) {
+    var counts = transportSummary(cfg.proxies);
+    var parts = Object.keys(counts).sort().map(function (k) { return k + "=" + counts[k]; });
+    return "country=" + (cfg.country || "?") + ", proxies=" + cfg.proxies.length +
+      (parts.length ? ", " + parts.join(", ") : "");
+  }
+
+  function escapeYaml(s) {
+    return '"' + String(s).replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
+  }
+
+  /*
+   Diagnostic subscription:
+   Shadowrocket can import Clash-compatible YAML, but v1 deliberately DOES NOT
+   emit Lantern SS/VMess as ordinary nodes because Lantern uses special marker
+   upstreams and then an inner HTTP CONNECT with Lantern auth headers.
+   Pretending these are normal nodes would create a pretty list that simply
+   does not work. Humans have invented enough of those.
+  */
+  function diagnosticSubscription(cfg) {
+    var sum = summaryText(cfg);
+    return [
+      "proxies:",
+      "  - name: " + escapeYaml("Lantern Probe | " + sum),
+      "    type: socks5",
+      "    server: 127.0.0.1",
+      "    port: 9",
+      "",
+      "proxy-groups:",
+      "  - name: " + escapeYaml("Lantern Debug"),
+      "    type: select",
+      "    proxies:",
+      "      - " + escapeYaml("Lantern Probe | " + sum),
+      ""
+    ].join("\n");
+  }
+
+  function jsonDebug(cfg) {
+    return JSON.stringify({
+      ok: true,
+      fetchedAt: new Date().toISOString(),
+      country: cfg.country || "",
+      proxyCount: cfg.proxies.length,
+      transports: transportSummary(cfg.proxies),
+      proxies: cfg.proxies.map(redactProxy)
+    }, null, 2);
+  }
+
+  function htmlEscape(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function page(title, text, ok) {
+    var accent = ok ? "#16a34a" : "#dc2626";
+    return "<!doctype html><html><head><meta charset=\"utf-8\">" +
+      "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
+      "<title>" + htmlEscape(title) + "</title>" +
+      "<style>body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;" +
+      "background:#111;color:#eee;padding:24px;line-height:1.45}" +
+      ".box{max-width:760px;margin:auto;background:#1c1c1e;border-radius:16px;padding:20px}" +
+      "h1{font-size:22px;margin-top:0;color:" + accent + "}" +
+      "pre{white-space:pre-wrap;word-break:break-word;background:#000;padding:14px;border-radius:12px}" +
+      "</style></head><body><div class=\"box\"><h1>" + htmlEscape(title) +
+      "</h1><pre>" + htmlEscape(text) + "</pre></div></body></html>";
+  }
+
+  function syntheticHtml(status, title, text, ok) {
+    $done({
+      response: {
+        status: status,
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "no-store"
+        },
+        body: page(title, text, ok)
+      }
+    });
+  }
+
+  function fail(message) {
+    log("ERROR: " + message);
+    syntheticHtml(502, "Lantern Probe Hatası", String(message), false);
+  }
+
+  function randomLowercase(n) {
+    var chars = "abcdefghijklmnopqrstuvwxyz";
+    var out = "";
+    for (var i = 0; i < n; i++) {
+      out += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return out;
+  }
+
+  function responseText(data, response) {
+    try {
+      if (typeof data === "string") return data;
+      if (response && typeof response.body === "string") return response.body;
+      var raw = normalizeBinary(data, response);
+      return utf8Decode(raw);
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function safeServerMessage(s) {
+    s = String(s || "");
+    // Avoid echoing auth material if an upstream error ever reflects input.
+    s = s.split(LANTERN.proToken).join("[token-redacted]");
+    return s.length > 1800 ? s.slice(0, 1800) + "\n...[truncated]" : s;
+  }
+
+  function fetchLantern() {
+    var reqBytes = buildConfigRequest();
+    var opts = {
+      url: CONFIG_URL,
+      method: "POST",
+      timeout: 20,
+      headers: {
+        "Content-Type": "application/x-protobuf",
+        "Accept": "application/x-protobuf",
+        "Cache-Control": "no-cache",
+
+        // Mirrors Flashlight common.AddCommonHeaders().
+        "X-Lantern-Version": LANTERN.flashlightVersion,
+        "X-Lantern-App-Version": LANTERN.clientVersion,
+        "X-Lantern-App": "",
+        "X-Lantern-Device-Id": LANTERN.deviceId,
+        "X-Lantern-Platform": LANTERN.platform,
+        "X-Lantern-Pro-Token": LANTERN.proToken,
+        "X-Lantern-User-Id": LANTERN.userId,
+        "X-Lantern-Locale": LANTERN.locale,
+        "X-Lantern-Time-Zone": LANTERN.timezone,
+        "X-Lantern-Supported-Data-Caps": "monthly, weekly, daily",
+        "X-Lantern-Rand": randomLowercase(64),
+
+        // Force the config fetch itself to leave China directly.
+        "X-Surge-Proxy": "DIRECT"
+      },
+
+      // IMPORTANT: Shadowrocket must receive protobuf bytes via bodyBytes.
+      // Passing an ArrayBuffer through `body` gets coerced to the literal
+      // string "[object ArrayBuffer]" (20 bytes), which Lantern rejects.
+      "binary-mode": true,
+      bodyBytes: toArrayBuffer(reqBytes)
+    };
+
+    log("Lantern API probe: " + CONFIG_URL + " requestBytes=" + reqBytes.length);
+
+    $httpClient.post(opts, function (error, response, data) {
+      if (error) return fail(String(error));
+
+      var code = Number((response && (response.statusCode || response.status)) || 0);
+      if (code !== 200 && code !== 204) {
+        var detail = safeServerMessage(responseText(data, response));
+        return fail(
+          "Lantern API HTTP " + code +
+          "\nrequestBytes=" + reqBytes.length +
+          (detail ? "\n\nServer response:\n" + detail : "\n\nServer response body: <empty>")
+        );
+      }
+      if (code === 204) {
+        return fail("Lantern API 204 döndürdü; proxy config gelmedi.");
+      }
+
+      try {
+        var raw = normalizeBinary(data, response);
+        var cfg = parseConfigResponse(raw);
+        var debug = jsonDebug(cfg);
+        var sum = summaryText(cfg);
+
+        try {
+          if (typeof $persistentStore !== "undefined") {
+            $persistentStore.write(debug, "lantern.feed.last_debug");
+          }
+        } catch (_) {}
+
+        syntheticHtml(
+          200,
+          "Lantern Config Geldi",
+          sum + "\n\n" + debug,
+          true
+        );
+      } catch (e) {
+        fail("Protobuf decode: " + (e && e.message ? e.message : String(e)));
+      }
+    });
+  }
+
+  var url = (typeof $request !== "undefined" && $request.url) ? $request.url : "";
+
+  if (url.indexOf("https://" + FEED_HOST + "/lantern-check") === 0) {
+    return syntheticHtml(
+      200,
+      "Shadowrocket Script Çalışıyor",
+      "SCRIPT_OK\n\nRemote JavaScript indirildi ve http-request tetikleyicisi çalıştı.",
+      true
+    );
+  }
+
+  if (url.indexOf("https://" + FEED_HOST + "/lantern-run") === 0) {
+    return fetchLantern();
+  }
+
+  return $done({});
+})();
