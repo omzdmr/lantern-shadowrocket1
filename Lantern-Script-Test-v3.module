@@ -1,0 +1,11 @@
+#!name=Lantern Script Test v3
+#!desc=DNS/HSTS olmadan Shadowrocket Map Local ve remote JavaScript testidir.
+
+[Map Local]
+^http:\/\/223\.5\.5\.5\/lantern-map(?:\?.*)?$ data-type=text data="SHADOWROCKET_MAP_OK" status-code=200
+
+[Script]
+Lantern Script Test = type=http-request,pattern=^http:\/\/223\.5\.5\.5\/lantern-ping(?:\?.*)?$,requires-body=false,timeout=10,engine=jsc,script-path=https://raw.githubusercontent.com/omzdmr/lantern-shadowrocket1/main/lantern_shadowrocket_test_v3.js,enable=true
+
+[Rule]
+IP-CIDR,223.5.5.5/32,DIRECT,no-resolve
