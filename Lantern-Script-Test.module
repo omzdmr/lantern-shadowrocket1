@@ -1,0 +1,8 @@
+#!name=Lantern Script Test
+#!desc=Shadowrocket remote JavaScript ve http-request tetikleme testi. Lantern API kullanmaz.
+
+[Script]
+Lantern Script Test = type=http-request,pattern=^http:\/\/neverssl\.com\/lantern-ping(?:\?.*)?$,requires-body=false,timeout=10,script-path=https://raw.githubusercontent.com/omzdmr/lantern-shadowrocket1/main/lantern_shadowrocket_test.js
+
+[Rule]
+DOMAIN,neverssl.com,DIRECT
