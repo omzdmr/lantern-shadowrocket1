@@ -1,0 +1,163 @@
+-- Lantern Free TLS backend for Shadowrocket
+-- Outer transport (TCP/TLS/SNI) is configured in the Shadowrocket Lua node.
+-- This backend only performs Lantern's inner HTTP CONNECT handshake.
+--
+-- Password field = per-proxy X-Lantern-Auth-Token from /lantern-material.
+--
+-- Based on Shadowrocket's official http-backend.lua API and Lantern's
+-- chained proxy CONNECT flow.
+
+local backend = require 'backend'
+
+local SUCCESS = backend.RESULT.SUCCESS
+local ERROR = backend.RESULT.ERROR
+local HANDSHAKE = backend.RESULT.HANDSHAKE
+local DIRECT = backend.RESULT.DIRECT
+local DIRECT_WRITE = backend.SUPPORT.DIRECT_WRITE
+
+local ctx_uuid = backend.get_uuid
+local ctx_address_host = backend.get_address_host
+local ctx_address_port = backend.get_address_port
+local ctx_write = backend.write
+local ctx_free = backend.free
+local debug = backend.debug
+
+local states = {}
+
+local function safe_header(v)
+    v = tostring(v or "")
+    v = string.gsub(v, "[\r\n]", "")
+    return v
+end
+
+local AUTH_TOKEN = safe_header(settings.password)
+
+local function target_for(ctx)
+    local host = ctx_address_host(ctx)
+    local port = ctx_address_port(ctx)
+
+    -- HTTP CONNECT requires brackets around IPv6 literals.
+    if string.find(host, ":", 1, true) and string.sub(host, 1, 1) ~= "[" then
+        host = "[" .. host .. "]"
+    end
+    return host .. ":" .. tostring(port)
+end
+
+function wa_lua_on_flags_cb(ctx)
+    local uuid = ctx_uuid(ctx)
+    states[uuid] = {
+        sent = false,
+        established = false,
+        response = ""
+    }
+    return DIRECT_WRITE
+end
+
+function wa_lua_on_handshake_cb(ctx)
+    local uuid = ctx_uuid(ctx)
+    local st = states[uuid]
+    if not st then
+        st = { sent = false, established = false, response = "" }
+        states[uuid] = st
+    end
+
+    if st.established then
+        return true
+    end
+
+    if not st.sent then
+        if AUTH_TOKEN == "" then
+            debug("Lantern: Password/AuthToken bos")
+            return false
+        end
+
+        local target = target_for(ctx)
+
+        -- Lantern flashlight does:
+        --   CONNECT target HTTP/1.1
+        --   Host: target
+        --   X-Lantern-Auth-Token: <per-proxy token>
+        --   common.AddCommonHeaders(...)
+        --   X-BBR: y
+        local req =
+            "CONNECT " .. target .. " HTTP/1.1\r\n" ..
+            "Host: " .. target .. "\r\n" ..
+            "Proxy-Connection: Keep-Alive\r\n" ..
+            "User-Agent: Go-http-client/1.1\r\n" ..
+            "X-Lantern-Auth-Token: " .. AUTH_TOKEN .. "\r\n" ..
+            "X-Lantern-Version: 7.6.179\r\n" ..
+            "X-Lantern-App-Version: 9999.99.99\r\n" ..
+            "X-Lantern-App: \r\n" ..
+            "X-Lantern-Device-Id: a34113\r\n" ..
+            "X-Lantern-Platform: android\r\n" ..
+            "X-Lantern-Pro-Token: K1qttSsZruN\r\n" ..
+            "X-Lantern-User-Id: 381696446\r\n" ..
+            "X-Lantern-Locale: \r\n" ..
+            "X-Lantern-Time-Zone: Asia/Shanghai\r\n" ..
+            "X-Lantern-Supported-Data-Caps: monthly, weekly, daily\r\n" ..
+            "X-BBR: y\r\n" ..
+            "\r\n"
+
+        debug("Lantern: CONNECT -> " .. target)
+        ctx_write(ctx, req)
+        st.sent = true
+    end
+
+    return false
+end
+
+function wa_lua_on_read_cb(ctx, buf)
+    local uuid = ctx_uuid(ctx)
+    local st = states[uuid]
+
+    if not st then
+        debug("Lantern: state missing")
+        return ERROR, nil
+    end
+
+    if not st.established then
+        st.response = st.response .. buf
+
+        local header_end = string.find(st.response, "\r\n\r\n", 1, true)
+        if not header_end then
+            -- Response header is incomplete. Swallow this chunk and wait.
+            return SUCCESS, nil
+        end
+
+        local header = string.sub(st.response, 1, header_end + 3)
+        local status = string.match(header, "^HTTP/%d+%.%d+%s+(%d+)")
+        local status_num = tonumber(status or "0")
+
+        if status_num < 200 or status_num >= 300 then
+            local first_line = string.match(header, "([^\r\n]+)") or "unknown response"
+            debug("Lantern: CONNECT rejected: " .. first_line)
+            return ERROR, nil
+        end
+
+        debug("Lantern: CONNECT 2xx")
+        st.established = true
+
+        -- CONNECT responses normally have no tunneled payload in the same packet.
+        -- If they do, preserve the tail.
+        local tail = string.sub(st.response, header_end + 4)
+        st.response = ""
+
+        if #tail > 0 then
+            return HANDSHAKE, tail
+        end
+        return HANDSHAKE, nil
+    end
+
+    return DIRECT, buf
+end
+
+function wa_lua_on_write_cb(ctx, buf)
+    return DIRECT, buf
+end
+
+function wa_lua_on_close_cb(ctx)
+    local uuid = ctx_uuid(ctx)
+    states[uuid] = nil
+    ctx_free(ctx)
+    return SUCCESS
+end
