@@ -1,0 +1,11 @@
+#!name=Lantern Free Local Probe
+#!desc=Shadowrocket içinde Lantern Free config API'yi doğrudan sorgular. Dış sunucu, Cloudflare, PC veya Android gerekmez. v1 tanılama sürümüdür.
+
+[Host]
+lantern-probe.test = 127.0.0.1
+
+[Script]
+Lantern Local Feed = type=http-request,pattern=^http:\/\/lantern-probe\.test\/(sub|debug)(?:\?.*)?$,requires-body=false,timeout=30,engine=jsc,script-path=https://raw.githubusercontent.com/omzdmr/lantern-shadowrocket1/main/lantern_shadowrocket_feed_v1.js
+
+[Rule]
+DOMAIN,df.iantem.io,DIRECT
