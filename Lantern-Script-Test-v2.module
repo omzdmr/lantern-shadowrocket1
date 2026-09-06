@@ -1,0 +1,11 @@
+#!name=Lantern Script Test v2
+#!desc=Önce Map Local ile modül interception testini, sonra remote JavaScript testini yapar. HTTPS/MITM gerekmez.
+
+[Map Local]
+^http:\/\/www\.baidu\.com\/lantern-map(?:\?.*)?$ data-type=text data="SHADOWROCKET_MAP_OK" status-code=200
+
+[Script]
+Lantern Script Test = type=http-request,pattern=^http:\/\/www\.baidu\.com\/lantern-ping(?:\?.*)?$,requires-body=false,timeout=10,engine=auto,script-path=https://raw.githubusercontent.com/omzdmr/lantern-shadowrocket1/main/lantern_shadowrocket_test.js,enable=true
+
+[Rule]
+DOMAIN,www.baidu.com,DIRECT
