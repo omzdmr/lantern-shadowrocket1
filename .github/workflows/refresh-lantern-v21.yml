@@ -1,4 +1,4 @@
-name: Refresh Lantern nodes v22
+name: Refresh Lantern nodes v23
 
 on:
   workflow_dispatch:
@@ -9,6 +9,8 @@ on:
       - main
     paths:
       - 'lantern_actions_v22.mjs'
+      - 'lantern_actions_v23.mjs'
+      - 'lantern_subscription_repair_v23.js'
       - 'lantern_worker_v19.js'
       - '.github/workflows/refresh-lantern-v21.yml'
 
@@ -33,7 +35,9 @@ jobs:
           node-version: '20'
 
       - name: Fetch fresh Lantern material and build Shadowrocket subscriptions
-        run: node lantern_actions_v22.mjs
+        run: |
+          node lantern_actions_v22.mjs
+          node lantern_actions_v23.mjs
 
       - name: Publish live branch
         shell: bash
@@ -42,6 +46,8 @@ jobs:
           cp nodes.json /tmp/lantern-nodes.json
           cp subscription.txt /tmp/lantern-subscription.txt
           cp subscription.b64 /tmp/lantern-subscription.b64
+          cp subscription-v23.txt /tmp/lantern-subscription-v23.txt
+          cp subscription-v23.b64 /tmp/lantern-subscription-v23.b64
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git checkout --orphan lantern-live-tmp
@@ -49,7 +55,9 @@ jobs:
           cp /tmp/lantern-nodes.json nodes.json
           cp /tmp/lantern-subscription.txt subscription.txt
           cp /tmp/lantern-subscription.b64 subscription.b64
-          git add nodes.json subscription.txt subscription.b64
+          cp /tmp/lantern-subscription-v23.txt subscription-v23.txt
+          cp /tmp/lantern-subscription-v23.b64 subscription-v23.b64
+          git add nodes.json subscription.txt subscription.b64 subscription-v23.txt subscription-v23.b64
           git commit -m "Refresh Lantern nodes $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           git branch -M live
           git push --force origin live
