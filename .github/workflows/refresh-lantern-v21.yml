@@ -4,6 +4,13 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '*/15 * * * *'
+  push:
+    branches:
+      - main
+    paths:
+      - 'lantern_actions_v22.mjs'
+      - 'lantern_worker_v19.js'
+      - '.github/workflows/refresh-lantern-v21.yml'
 
 permissions:
   contents: write
