@@ -1,0 +1,10 @@
+#!name=Lantern Node v18
+#!desc=Fetches fresh Lantern Free TLS material on-device and returns a real Shadowrocket Lua node JSON file.
+
+[Script]
+Lantern Node v18 Single = type=http-request,pattern=^http:\/\/connect\.rom\.miui\.com\/lantern-node-v18\.json(?:\?.*)?$,requires-body=false,timeout=30,engine=jsc,script-path=https://cdn.jsdelivr.net/gh/omzdmr/lantern-shadowrocket1@5a4ac9002a7414d94032d46583273d3b3b1f24d0/lantern_shadowrocket_node_v18.js,enable=true
+Lantern Node v18 All = type=http-request,pattern=^http:\/\/connect\.rom\.miui\.com\/lantern-nodes-v18\.json(?:\?.*)?$,requires-body=false,timeout=30,engine=jsc,script-path=https://cdn.jsdelivr.net/gh/omzdmr/lantern-shadowrocket1@5a4ac9002a7414d94032d46583273d3b3b1f24d0/lantern_shadowrocket_node_v18.js,enable=true
+
+[Rule]
+DOMAIN,connect.rom.miui.com,DIRECT
+DOMAIN,df.iantem.io,DIRECT
