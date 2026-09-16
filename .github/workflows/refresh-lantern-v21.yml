@@ -1,0 +1,44 @@
+name: Refresh Lantern nodes v21
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/15 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: lantern-live-refresh
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch fresh Lantern material
+        run: node lantern_actions_v21.mjs
+
+      - name: Publish single-file live branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp nodes.json /tmp/lantern-nodes.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout --orphan lantern-live-tmp
+          git rm -rf .
+          cp /tmp/lantern-nodes.json nodes.json
+          git add nodes.json
+          git commit -m "Refresh Lantern nodes $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          git branch -M live
+          git push --force origin live
