@@ -1,0 +1,9 @@
+#!name=Lantern Dynamic v17 Bootstrap
+#!desc=On-device Lantern Free config fetcher. Generates fresh Shadowrocket Lua nodes without storing session material on GitHub.
+
+[Script]
+Lantern Dynamic v17 = type=http-request,pattern=^http:\/\/connect\.rom\.miui\.com\/lantern-dynamic-v17\.conf(?:\?.*)?$,requires-body=false,timeout=30,engine=jsc,script-path=https://cdn.jsdelivr.net/gh/omzdmr/lantern-shadowrocket1@eea11e9ce72172efcc019b04ffde93620ce37a17/lantern_shadowrocket_dynamic_v17.js,enable=true
+
+[Rule]
+DOMAIN,connect.rom.miui.com,DIRECT
+DOMAIN,df.iantem.io,DIRECT
