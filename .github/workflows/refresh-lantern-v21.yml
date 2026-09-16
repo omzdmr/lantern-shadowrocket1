@@ -1,4 +1,4 @@
-name: Refresh Lantern nodes v21
+name: Refresh Lantern nodes v22
 
 on:
   workflow_dispatch:
@@ -25,20 +25,24 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Fetch fresh Lantern material
-        run: node lantern_actions_v21.mjs
+      - name: Fetch fresh Lantern material and build Shadowrocket subscriptions
+        run: node lantern_actions_v22.mjs
 
-      - name: Publish single-file live branch
+      - name: Publish live branch
         shell: bash
         run: |
           set -euo pipefail
           cp nodes.json /tmp/lantern-nodes.json
+          cp subscription.txt /tmp/lantern-subscription.txt
+          cp subscription.b64 /tmp/lantern-subscription.b64
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git checkout --orphan lantern-live-tmp
           git rm -rf .
           cp /tmp/lantern-nodes.json nodes.json
-          git add nodes.json
+          cp /tmp/lantern-subscription.txt subscription.txt
+          cp /tmp/lantern-subscription.b64 subscription.b64
+          git add nodes.json subscription.txt subscription.b64
           git commit -m "Refresh Lantern nodes $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           git branch -M live
           git push --force origin live
