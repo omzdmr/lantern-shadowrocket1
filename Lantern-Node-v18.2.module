@@ -1,0 +1,10 @@
+#!name=Lantern Node v18.2
+#!desc=Generates real Shadowrocket Lua node JSON from fresh Lantern material using recursive protobuf scanning.
+
+[Script]
+Lantern Node v18.2 = type=http-request,pattern=^http:\/\/connect\.rom\.miui\.com\/lantern-node-v18-2\.json(?:\?.*)?$,requires-body=false,timeout=30,engine=jsc,script-path=https://cdn.jsdelivr.net/gh/omzdmr/lantern-shadowrocket1@171fa91c1e5248074368c910c4330bd79c14f1dc/lantern_shadowrocket_node_v18_2.js,enable=true
+Lantern Nodes v18.2 = type=http-request,pattern=^http:\/\/connect\.rom\.miui\.com\/lantern-nodes-v18-2\.json(?:\?.*)?$,requires-body=false,timeout=30,engine=jsc,script-path=https://cdn.jsdelivr.net/gh/omzdmr/lantern-shadowrocket1@171fa91c1e5248074368c910c4330bd79c14f1dc/lantern_shadowrocket_node_v18_2.js,enable=true
+
+[Rule]
+DOMAIN,connect.rom.miui.com,DIRECT
+DOMAIN,df.iantem.io,DIRECT
