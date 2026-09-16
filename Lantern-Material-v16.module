@@ -1,0 +1,13 @@
+#!name=Lantern TLS Material v16
+#!desc=LOCAL ONLY: fetches Lantern Free TLS resume material on-device. Do not share the L16 secret bundle.
+
+[Rule]
+DOMAIN,connect.rom.miui.com,DIRECT
+DOMAIN,df.iantem.io,DIRECT
+
+[Script]
+Lantern TLS Material v16 = type=http-request,pattern=^https:\/\/connect\.rom\.miui\.com\/lantern-material-v16(?:\?.*)?$,requires-body=false,timeout=30,engine=jsc,script-path=https://cdn.jsdelivr.net/gh/omzdmr/lantern-shadowrocket1@54b300788ec539c774428e63b0c50dcd25b156ed/lantern_shadowrocket_material_v16.js,enable=true
+
+[MITM]
+hostname = connect.rom.miui.com
+enable = true
