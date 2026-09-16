@@ -1,0 +1,13 @@
+#!name=Lantern Free TLS Profile v14
+#!desc=Lantern Free config API'den guvenli TLS profil ozeti alir. Token, sertifika ve TLS session secret byte'larini gostermez.
+
+[Script]
+Lantern Free TLS Profile v14 = type=http-request,pattern=^https:\/\/connect\.rom\.miui\.com\/lantern-(?:check|run|tls-profile|versions)(?:\?.*)?$,requires-body=false,timeout=30,engine=jsc,script-path=https://raw.githubusercontent.com/omzdmr/lantern-shadowrocket1/main/lantern_shadowrocket_probe_v14.js,enable=true
+
+[Rule]
+DOMAIN,connect.rom.miui.com,DIRECT
+DOMAIN,df.iantem.io,DIRECT
+
+[MITM]
+hostname = %APPEND% connect.rom.miui.com
+enable = true
