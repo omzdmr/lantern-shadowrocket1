@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "lantern-auto-v19",
+  "name": "lantern-shadowrocket1",
   "main": "lantern_worker_v19.js",
-  "compatibility_date": "2026-09-17",
+  "compatibility_date": "2026-09-16",
   "workers_dev": true
 }
