@@ -1,0 +1,13 @@
+#!name=Lantern v16 Legacy Session Probe
+#!desc=Lantern Free config API'yi Flashlight 7.6.150 olarak sorgular ve yalnizca guvenli TLS session metadata'sini gosterir. Secret byte gostermez.
+
+[Script]
+Lantern v16 Legacy Check = type=http-request,pattern=^https:\/\/connect\.rom\.miui\.com\/lantern-v16-check(?:\?.*)?$,requires-body=false,timeout=30,engine=jsc,script-path=https://cdn.jsdelivr.net/gh/omzdmr/lantern-shadowrocket1@ac96faef9478e13952b60bb4813ba98a5c803963/lantern_v16_legacy_probe.js,enable=true
+
+[Rule]
+DOMAIN,connect.rom.miui.com,DIRECT
+DOMAIN,df.iantem.io,DIRECT
+
+[MITM]
+hostname = %APPEND% connect.rom.miui.com
+enable = true
