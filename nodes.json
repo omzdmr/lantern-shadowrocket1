@@ -1,0 +1,42 @@
+[
+  {
+    "host": "158.180.239.71",
+    "path": "lantern_tls_resume_smux_v16_2.lua",
+    "type": "Lua",
+    "user": "channelstv.com|Ltu6zEyC+Odqq3asRwwZD6D7ToDs40iv2ZKSvuu+2XfX5xi11FnlOpevX2b+xfxi91kqBm1EbR3OrtF5ow9aU4Q1l7P90zSYECUfRuj+3W1sD1SgvL5PWpX8oXk49SdtfGAL7Vw3B5cCIHNs4ppyhj1zRrF1IMisQg==",
+    "plugin": "none",
+    "method": "aes-256-cfb",
+    "udp": 0,
+    "allowInsecure": 1,
+    "port": "443",
+    "obfs": "none",
+    "proto": "none",
+    "password": "i9gA2OE5+m19Mj3aRRWtA/6aATzUBl1ue7OykPzgwHll0vuNim47nAO49CbOWCX/4a02661ff26a41a2a12732f5852b395547b0f52445001c81ce005e0dfbbd021c",
+    "title": "Lantern Auto v19 channelstv.com",
+    "uuid": "550D8CFE-105F-B356-550D-8CFE105FB356",
+    "created": 1789846263.516,
+    "updated": 1789846263.516,
+    "weight": 1789846263,
+    "tlsFrag": ""
+  },
+  {
+    "host": "129.146.39.214",
+    "path": "lantern_tls_resume_smux_v16_2.lua",
+    "type": "Lua",
+    "user": "ovhcloud.com|prR+XDK16kT2mj5LNcorKhL8QmvMMIm9CIKpi8lcaH5NGSFiPrYZoqp3JYS8cjnlbo3wZ7fyTUQ9XontmEYRlQE5W/ir2Mba0cWVknBzzkfP9LA9izsbruUBLZVihooEtCPrGRbpFXnsUnTo7/X0eoEaKNOJP+zUig==",
+    "plugin": "none",
+    "method": "aes-256-cfb",
+    "udp": 0,
+    "allowInsecure": 1,
+    "port": "443",
+    "obfs": "none",
+    "proto": "none",
+    "password": "SDSLF8TsZTrsCtUnsxCCT9g1e9jj0cZj7mDRLr6Z8yf8eHWYs3apSKvgj6bbFhpuf33920bfa86474c1c247fdf783a28437d278de6060ba30f1f89854020f1b8e93",
+    "title": "Lantern Auto v19 ovhcloud.com",
+    "uuid": "3D259515-CD22-CDA7-3D25-9515CD22CDA7",
+    "created": 1789846263.517,
+    "updated": 1789846263.517,
+    "weight": 1789846263,
+    "tlsFrag": "index:1"
+  }
+]
