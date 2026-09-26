@@ -1,0 +1,42 @@
+[
+  {
+    "host": "140.245.107.149",
+    "path": "lantern_tls_resume_smux_v16_2.lua",
+    "type": "Lua",
+    "user": "mathway.com|pYmXRdqUNtPEdHCvW0jad4FdbHgjftuWFCj1RryFGxlOK65Isno0OO/eLrG+uECA7mZw2SJ3575nQcV290WkLK/EsHBRnl8yJxYH5EZq6sJU48YCuvJW8V8LxkVj6dlF+gYKleYPNSL45hjVknvlnNkqpqHsYHmFxA==",
+    "plugin": "none",
+    "method": "aes-256-cfb",
+    "udp": 0,
+    "allowInsecure": 1,
+    "port": "443",
+    "obfs": "none",
+    "proto": "none",
+    "password": "ZoNAMdIWj0lUk0R6OP5vSkXaY5k1UNofsExmO6NiR+DlfWjbUNJKXhGR3fqq0P3ta02806fc583aed70d0b4a30835d968a6915712ba5585beac10d8673a1710fd80",
+    "title": "Lantern Auto v19 mathway.com",
+    "uuid": "9E883454-1772-5264-9E88-345417725264",
+    "created": 1790432202.959,
+    "updated": 1790432202.959,
+    "weight": 1790432202,
+    "tlsFrag": ""
+  },
+  {
+    "host": "130.110.11.162",
+    "path": "lantern_tls_resume_smux_v16_2.lua",
+    "type": "Lua",
+    "user": "nobroker.in|LajXHpw8qPqCj570reX4zujUGf0ESTEoS9eYaevKag9Icos9jFf6D3NUHMR4rlF0O51ks4PjywYBUjEI3iWk1/4Fy9MahEwKxTfaaQoSBXkF++C1iSTupCndTHtpmXAtICLS7yDmVAIv4s9uLhR4De16Hr45Zzcx5Q==",
+    "plugin": "none",
+    "method": "aes-256-cfb",
+    "udp": 0,
+    "allowInsecure": 1,
+    "port": "443",
+    "obfs": "none",
+    "proto": "none",
+    "password": "Z8hn6gmZ5IukD3BCzbqaQcMCesiiRmtCVXDlfY460xxTUDmlVTOyG5gqMwxCZQ4T68f8dfb21f722346c37b60ccb9b1b08047ecad03fce81019920ef107e11a8698",
+    "title": "Lantern Auto v19 nobroker.in",
+    "uuid": "105FCBAC-86AB-BE14-105F-CBAC86ABBE14",
+    "created": 1790432202.959,
+    "updated": 1790432202.959,
+    "weight": 1790432202,
+    "tlsFrag": ""
+  }
+]
