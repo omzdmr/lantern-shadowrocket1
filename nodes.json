@@ -1,0 +1,42 @@
+[
+  {
+    "host": "130.110.3.241",
+    "path": "lantern_tls_resume_smux_v16_2.lua",
+    "type": "Lua",
+    "user": "livecareer.com|R1/GwvdzLPQqQTez45QFch4Rq9dkgGzmc3M86P76EE2ziYqbVsgWFy4ybWp/P8JVSLbajLP1YvH/RVGhoOr+ZL4U2mK3+79/42Y6+e/PXMV6/B/6+YcDGk7Eo+eehf3fr8WHFnecxT6mgoANJ9bktycY1UOXRumi3w==",
+    "plugin": "none",
+    "method": "aes-256-cfb",
+    "udp": 0,
+    "allowInsecure": 1,
+    "port": "443",
+    "obfs": "none",
+    "proto": "none",
+    "password": "+kcZlT1OrpEaRCyHuDiYUc6SZtJDNOFrnefrvP2JIT77rpQqYV4Nuj9DoMlBEx1Hae4b1c44016795236622d7be279301dbd22c182d07d3f775b41ca720b4cc0289",
+    "title": "Lantern Auto v19 livecareer.com",
+    "uuid": "ACCFA20B-F176-7499-ACCF-A20BF1767499",
+    "created": 1791052968.32,
+    "updated": 1791052968.32,
+    "weight": 1791052968,
+    "tlsFrag": ""
+  },
+  {
+    "host": "168.138.167.28",
+    "path": "lantern_tls_resume_smux_v16_2.lua",
+    "type": "Lua",
+    "user": "blackmagicdesign.com|yhO5byDEzaG1pHNEVry0r6gK1aIhfB+mv6b0HAbpgGnqH/rjepAlyhmpaFg+HsYQoIa174kIlSQVyb3JjKhWKDv1C123r6RLaMXG+95l+DcLouW6YfEASIpPY7IAlOcjTndynxfLaDq6NPQLEhkT7JKMgY/+cAVwTw==",
+    "plugin": "none",
+    "method": "aes-256-cfb",
+    "udp": 0,
+    "allowInsecure": 1,
+    "port": "443",
+    "obfs": "none",
+    "proto": "none",
+    "password": "xEIWA/+vhdUrUjQCGuNtNmX5Ij0pKc7MIhkZc5cK8ys4W/zoKUlFLC+XICKIVnB48fcc4df7d1763bb9ecf3cde9e82fbc0dc499a35456884c1c416abc08b5ef2cbe",
+    "title": "Lantern Auto v19 blackmagicdesign.com",
+    "uuid": "9C9F609C-1636-C95C-9C9F-609C1636C95C",
+    "created": 1791052968.32,
+    "updated": 1791052968.32,
+    "weight": 1791052968,
+    "tlsFrag": ""
+  }
+]
