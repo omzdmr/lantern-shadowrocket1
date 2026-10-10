@@ -1,0 +1,42 @@
+[
+  {
+    "host": "130.110.5.30",
+    "path": "lantern_tls_resume_smux_v16_2.lua",
+    "type": "Lua",
+    "user": "gbf.wiki|/uwsJAQ6RjsVrdLue6Wq8Z89PeBWKMESKtqG1B63sIOeHR9lJELXW6t0KUF5OEwwa+DxtIzaanld+FlGcT5x0qFP2eePxjFots+QOZlrGQR2hvtT4GbrNLbhQd7oYSaZFB6SOsxtz37bdoi4k4kI/qvhl0RY5BmVNA==",
+    "plugin": "none",
+    "method": "aes-256-cfb",
+    "udp": 0,
+    "allowInsecure": 1,
+    "port": "443",
+    "obfs": "none",
+    "proto": "none",
+    "password": "1KDVnbVWIomPGopNOfuqFmCHHImjPsg9KU4DmdE5xW7+/Cl2SmyHRPaYk/RNzvM396a7e4572d1d4ab9543295188939be0d795a3fdcc59f03227b7e30e98cab1306",
+    "title": "Lantern Auto v19 gbf.wiki",
+    "uuid": "51B35951-AEB8-428D-51B3-5951AEB8428D",
+    "created": 1791649216.809,
+    "updated": 1791649216.809,
+    "weight": 1791649216,
+    "tlsFrag": ""
+  },
+  {
+    "host": "168.107.76.48",
+    "path": "lantern_tls_resume_smux_v16_2.lua",
+    "type": "Lua",
+    "user": "epson.com|sCd+xzadQT2NGfaNLTKwOnp39r3c7/OJ5Bkm4yJX4Jp41Q0ONtZ4V0mp4FEUR1RqvBI1YoMpvq22GaxPUT3/yECU2/jxlGvtbiB/2oWmTDkj++O0Fkhq07hfkZwWOxY+GjWcnrEHn8UIeEm+lBEw6RGlIcbUEHROjg==",
+    "plugin": "none",
+    "method": "aes-256-cfb",
+    "udp": 0,
+    "allowInsecure": 1,
+    "port": "443",
+    "obfs": "none",
+    "proto": "none",
+    "password": "rFZVyc3vkneBd4SGwS7YUok5XIamwjeQBJaMOz8BhdgbA8zr7c6TZPpJoAkcxByy0cb0bece6179ba4938e0e905bd46c64e364bf6099e9abd9415dd6e0d8d1b934e",
+    "title": "Lantern Auto v19 epson.com",
+    "uuid": "3BD36DCE-C1DB-CF18-3BD3-6DCEC1DBCF18",
+    "created": 1791649216.809,
+    "updated": 1791649216.809,
+    "weight": 1791649216,
+    "tlsFrag": ""
+  }
+]
