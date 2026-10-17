@@ -1,0 +1,42 @@
+[
+  {
+    "host": "168.107.83.92",
+    "path": "lantern_tls_resume_smux_v16_2.lua",
+    "type": "Lua",
+    "user": "1tamilmv.bond|JCK0LHJhLSCI9P84bLP2PpVcdBFcvt9HZprkHfo0Z6DX7a//UL1CvUyZnVl4uIqUnTN2FENs4oxTvHS6WPwDr5sBHU1ks2yQFtBsCvxT2Chc4RC6EzARC71VXViIjJtcSN6Wfqj181A4B6yiHg7mE5cy3qgoyGtSBA==",
+    "plugin": "none",
+    "method": "aes-256-cfb",
+    "udp": 0,
+    "allowInsecure": 1,
+    "port": "443",
+    "obfs": "none",
+    "proto": "none",
+    "password": "lJnHbaJqIRiyT79o0twdp4PO87vGCAIbrbZtta1CnsiYCfuFEY1U/FF2DcF6tRZZaae85348b4fc0ab61f10e8b398be655c18318ed2aedcadea0993e433b70da99f",
+    "title": "Lantern Auto v19 1tamilmv.bond",
+    "uuid": "7FBE79B1-A0DB-05B3-7FBE-79B1A0DB05B3",
+    "created": 1792273267.717,
+    "updated": 1792273267.717,
+    "weight": 1792273267,
+    "tlsFrag": ""
+  },
+  {
+    "host": "129.152.31.154",
+    "path": "lantern_tls_resume_smux_v16_2.lua",
+    "type": "Lua",
+    "user": "op.fi|TCulka4dWjL8Q/fPIx0wX8QwtBgNTGgkfBbT22ayjtNU9ZnvC0C0q2PX9fYVtQquRHZ5Xm28N9uGV8aBO2tWIhXwY7XGP5+z/F1Uqmu6b/T6qEkAdJ4+vweTZgKkdFgXn1dKPH3MCTpBuzN86QejU1MhZN5gG0/UlQ==",
+    "plugin": "none",
+    "method": "aes-256-cfb",
+    "udp": 0,
+    "allowInsecure": 1,
+    "port": "443",
+    "obfs": "none",
+    "proto": "none",
+    "password": "4LIGRNbp1dS2zioPJYcc3ZlhbSPapSiv7Nu+Z6GkkU+uCCKEWdY/2SFm5SDk5ESP71bd1b916a96a330861bd10e8788cbec21c2dd55653ac096427e4dc01d85c514",
+    "title": "Lantern Auto v19 op.fi",
+    "uuid": "5A3F781A-C5D5-7C6C-5A3F-781AC5D57C6C",
+    "created": 1792273267.717,
+    "updated": 1792273267.717,
+    "weight": 1792273267,
+    "tlsFrag": ""
+  }
+]
