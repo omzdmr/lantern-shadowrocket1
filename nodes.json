@@ -1,0 +1,42 @@
+[
+  {
+    "host": "92.4.167.45",
+    "path": "lantern_tls_resume_smux_v16_2.lua",
+    "type": "Lua",
+    "user": "filmix.ac|YMrWsGlBU+kgqITUr5QmukFn6pY4Hw6cImWMpJoqwBTLjqLr82ELHK/ujLqVsoGUvpF3f2Z+UoQ7eazdIdmBasCTdLmhWURsvEap0iWhXlNAB7+SgwVJkT5hjtHjSMlFz7DHFzYEFB+zFgd9amJf6y9YDa8QWK1JBQ==",
+    "plugin": "none",
+    "method": "aes-256-cfb",
+    "udp": 0,
+    "allowInsecure": 1,
+    "port": "443",
+    "obfs": "none",
+    "proto": "none",
+    "password": "5iOrKS56KyYFBuLW2tuaUR/UKRciEeRNIf0aiwakPaROWUl5tFFsVvEgwnRS77kZec2a3fa72f230b28a77226bad4b132f67b5372090e4b71b9c83fbe873f894810",
+    "title": "Lantern Auto v19 filmix.ac",
+    "uuid": "185BC66B-9CE0-A3C1-185B-C66B9CE0A3C1",
+    "created": 1792847542.455,
+    "updated": 1792847542.455,
+    "weight": 1792847542,
+    "tlsFrag": ""
+  },
+  {
+    "host": "129.221.180.248",
+    "path": "lantern_tls_resume_smux_v16_2.lua",
+    "type": "Lua",
+    "user": "123moviesite.one|Sf49PNqL7Xben3PJMllgzJeTZOMlA/NUALEM/QPmmdWa8Rxfc0NTsjHEA62pTOalclYK1HwqW4hvb2LNQg91QX4O6RRNhs9SzHdT/QA8UvBRouTtlOYwpWxPA3z6VnEzonV7wSBeK0ecc6qLTkFpCFetcdJpunmDCg==",
+    "plugin": "none",
+    "method": "aes-256-cfb",
+    "udp": 0,
+    "allowInsecure": 1,
+    "port": "443",
+    "obfs": "none",
+    "proto": "none",
+    "password": "/2zz8Zj77C34yWrhCXIKLWF6/SH4wuh+esS7PwBA1Bc9JEOEDeH/4xCPpciP+dE951467ee7b6ad1988f650f2ef99cd1dad2efe68828072fa05b847d13afc1c7f26",
+    "title": "Lantern Auto v19 123moviesite.one",
+    "uuid": "502A3AB3-ADCA-48A1-502A-3AB3ADCA48A1",
+    "created": 1792847542.456,
+    "updated": 1792847542.456,
+    "weight": 1792847542,
+    "tlsFrag": ""
+  }
+]
