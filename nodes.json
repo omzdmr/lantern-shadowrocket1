@@ -1,0 +1,22 @@
+[
+  {
+    "host": "80.225.87.155",
+    "path": "lantern_tls_resume_smux_v16_2.lua",
+    "type": "Lua",
+    "user": "namava.ir|VLTukvEvGa34zrHQKEvZZZU8MZ3TCGwKVhUk/VkPiRtmJ7UCIaQ43wiEubk9cDKwH0M0bs8MyfE0JvINe0iIGTYAxc+iy/O3Eb3Ggah0C4D49x3WC0x6XBQPBox5s4lMKh6sQEynk5mXGBJVUTXaTaZoZ7tjLpedBg==",
+    "plugin": "none",
+    "method": "aes-256-cfb",
+    "udp": 0,
+    "allowInsecure": 1,
+    "port": "443",
+    "obfs": "none",
+    "proto": "none",
+    "password": "LMKFFNEzutFjggJf3mfo+35PSpDPmmepEVAldH953lViUtkfGzyHDXpuC7BTvGlwb37a4f3f8740e38bc9c18150f6f3986f6440d7f742d668b807a923c9f7272ed8",
+    "title": "Lantern Auto v19 namava.ir",
+    "uuid": "BA1EA8D4-8AAB-7DEE-BA1E-A8D48AAB7DEE",
+    "created": 1794042426.969,
+    "updated": 1794042426.969,
+    "weight": 1794042426,
+    "tlsFrag": ""
+  }
+]
