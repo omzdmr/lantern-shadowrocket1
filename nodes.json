@@ -1,0 +1,42 @@
+[
+  {
+    "host": "130.110.68.88",
+    "path": "lantern_tls_resume_smux_v16_2.lua",
+    "type": "Lua",
+    "user": "stvkr.com|bsobhLQhhlFGMZSY0KJxJdGVdgNu+pOuK16dSGwypNRp38LSf2KX/ps7soBhdJrjl2D8oEWSc1cDHo888B5dWtY4Q3HmsNp2qrWjOEhH+G9SpMFMYcvmelpxU1zEYgRf34X82jq60RZNSvx1jI7Ti2xn63i54kM0bA==",
+    "plugin": "none",
+    "method": "aes-256-cfb",
+    "udp": 0,
+    "allowInsecure": 1,
+    "port": "443",
+    "obfs": "none",
+    "proto": "none",
+    "password": "/t2EG/CiSmOk7fLa3tbDzyY6r7TMWlaZdc3x/h9jLJFr2ImTPkWCXGGuoAkvThaO4b10fc6b1c76775d3c3a1cea158801dd82fe3ff6e10a65a2ca076c0685b809a0",
+    "title": "Lantern Auto v19 stvkr.com",
+    "uuid": "FFE95883-3F85-C2EB-FFE9-58833F85C2EB",
+    "created": 1794648590.63,
+    "updated": 1794648590.63,
+    "weight": 1794648590,
+    "tlsFrag": ""
+  },
+  {
+    "host": "129.221.174.18",
+    "path": "lantern_tls_resume_smux_v16_2.lua",
+    "type": "Lua",
+    "user": "ravelry.com|9afr18oVyLZEd6PumY2OoxVdA6e8sC9c8ehWtwRbVu6dVhxvK6KnYcP1w6I/Ku1+KCOYUcAh2fkz+qPezTtvrlVitHNpWNU+ki8tuwSNbXGnRcOrhY6BVdHE8HFbDsLVuCEgYIA9akbLVhf0cPxkXNtS5lqWt/DBQA==",
+    "plugin": "none",
+    "method": "aes-256-cfb",
+    "udp": 0,
+    "allowInsecure": 1,
+    "port": "443",
+    "obfs": "none",
+    "proto": "none",
+    "password": "h1TOF8nyca/nwQgARIOOxSKl2pd1hyJHxATml0h27f0l30JzdqSUGeAfurk43iWed1c22d9565e392258b534e79958227914a3750efd3177c87aa4252a0965c6a06",
+    "title": "Lantern Auto v19 ravelry.com",
+    "uuid": "3948134C-4FBD-DD88-3948-134C4FBDDD88",
+    "created": 1794648590.63,
+    "updated": 1794648590.63,
+    "weight": 1794648590,
+    "tlsFrag": ""
+  }
+]
