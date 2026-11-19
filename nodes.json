@@ -1,0 +1,42 @@
+[
+  {
+    "host": "168.138.166.99",
+    "path": "lantern_tls_resume_smux_v16_2.lua",
+    "type": "Lua",
+    "user": "phoenixnap.com|64nu+SHKrJuauDVx0/vYU64hdA8ANGGrParkAtaU5fHgKTGMChjK3N0JKvQghJkD2DvrAjErEoekTTJ6k5C1IkMLb8M78E+qAQLo7OuCrULanZmmoLDuWSskQHEzlb6pAEX9MR4QsIC6QKdJ1V8AIWYHp9Eh7qozRA==",
+    "plugin": "none",
+    "method": "aes-256-cfb",
+    "udp": 0,
+    "allowInsecure": 1,
+    "port": "443",
+    "obfs": "none",
+    "proto": "none",
+    "password": "Xp7Bb4MGwlSOR3iB01tgSkcsP/V21f0gNgQPzIH6W5Ay2LUV16qnHFy6wpZ2ZhJV1b97731272e27a7075361daa9bc1acfb7f1bb40b98402d3d8b086baf188b513e",
+    "title": "Lantern Auto v19 phoenixnap.com",
+    "uuid": "2E4DF319-B2D4-CE91-2E4D-F319B2D4CE91",
+    "created": 1795096604.298,
+    "updated": 1795096604.298,
+    "weight": 1795096604,
+    "tlsFrag": ""
+  },
+  {
+    "host": "80.225.92.56",
+    "path": "lantern_tls_resume_smux_v16_2.lua",
+    "type": "Lua",
+    "user": "sulseerg.com|MeBKU8CBC6SvUZOD0uhL4ej4h3qbg3rAAWc3Bj9iu3v6vV4YcQQ9C9fURwOBlwm6K0e4aObcAXg9tc6NyGuqVWGF1RfcdGjrh8lfP2gbWD23SaxfIKGqhL/HzyHGHFGTGA89P24BXpceYpIP74XepoRiJuVMSUacbQ==",
+    "plugin": "none",
+    "method": "aes-256-cfb",
+    "udp": 0,
+    "allowInsecure": 1,
+    "port": "443",
+    "obfs": "none",
+    "proto": "none",
+    "password": "yAM5POFbMJj26oIZ48+YEANGysyfp8FT9Ws1IhSh2IshEzfS08TzinC5X1lX1eIJ69f1250d12545e77d21cb78782ac44e574a889c4624eed382c234c454445f1c4",
+    "title": "Lantern Auto v19 sulseerg.com",
+    "uuid": "F6A79F88-5EA7-7B12-F6A7-9F885EA77B12",
+    "created": 1795096604.298,
+    "updated": 1795096604.298,
+    "weight": 1795096604,
+    "tlsFrag": ""
+  }
+]
